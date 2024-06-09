@@ -109,4 +109,18 @@ class AuthController extends Controller
         ], Response::HTTP_OK);
     }
 
+    public function deleteUser($id)
+    {
+        // Buscar el usuario a eliminar
+        $user = User::findOrFail($id);
+
+        // Eliminar el usuario
+        $user->delete();
+
+        // Devolver la respuesta
+        return response()->json([
+            "message" => "Usuario eliminado exitosamente"
+        ], Response::HTTP_OK);
+    }
+
 }
