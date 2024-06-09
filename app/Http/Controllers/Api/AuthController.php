@@ -78,16 +78,34 @@ class AuthController extends Controller
             "userData" => auth()->user()
         ], Response::HTTP_OK);
     }
-    public function updateProfile(UpdateProfileRequest $request)
+    public function updateUser(Request $request, $id)
     {
-        $user = Auth::user();
+        // Buscar el usuario a actualizar
+        $user = User::findOrFail($id);
+
+        // Validar los datos de entrada
+        $request->validate([
+            "name" => 'required',
+            "email" => "required|email|unique:users,email,$user->id", // Asegurar que el correo electrónico sea único excepto para el usuario actual
+            "password" => 'nullable|confirmed' // El campo de contraseña es opcional
+        ]);
+
+        // Actualizar los campos del usuario
         $user->name = $request->name;
         $user->email = $request->email;
+
+        // Si se proporciona una nueva contraseña, se actualiza
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
+        }
+
+        // Guardar los cambios en la base de datos
         $user->save();
 
+        // Devolver la respuesta
         return response()->json([
-            'message' => 'Perfil actualizado exitosamente',
-            'user' => $user
+            "message" => "Usuario actualizado exitosamente",
+            "user" => $user
         ], Response::HTTP_OK);
     }
 
